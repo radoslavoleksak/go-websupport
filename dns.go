@@ -10,6 +10,8 @@ type DNSService interface {
 	ListAllDNSRecords(userId int, domainName string) (ListAllDNSRecordsResponse, error)
 	GetDNSRecordDetail(userId int, domainName string, recordId int) (DNSRecord, error)
 	CreateDNSRecord(userId int, domainName string, dnsRecord *DNSRecord) (CreateDNSRecordResponse, error)
+	UpdateDNSRecord(userId int, domainName string, recordId int, dnsRecord *DNSRecord) (CreateDNSRecordResponse, error)
+	DeleteDNSRecord(userId int, domainName string, recordId int) (CreateDNSRecordResponse, error)
 }
 
 type DNSServiceImpl struct {
@@ -60,6 +62,26 @@ func (s *DNSServiceImpl) CreateDNSRecord(userId int, domainName string, dnsRecor
 	path := fmt.Sprintf("/v1/user/%v/zone/%v/record", userId, domainName)
 
 	req, err := s.client.newRequest("POST", path, dnsRecord)
+
+	var createDNSRecordResponse CreateDNSRecordResponse
+	_, err = s.client.do(req, &createDNSRecordResponse)
+	return createDNSRecordResponse, err
+}
+
+func (s *DNSServiceImpl) UpdateDNSRecord(userId int, domainName string, recordId int, dnsRecord *DNSRecord) (CreateDNSRecordResponse, error) {
+	path := fmt.Sprintf("/v1/user/%v/zone/%v/record/%v", userId, domainName, recordId)
+
+	req, err := s.client.newRequest("PUT", path, dnsRecord)
+
+	var createDNSRecordResponse CreateDNSRecordResponse
+	_, err = s.client.do(req, &createDNSRecordResponse)
+	return createDNSRecordResponse, err
+}
+
+func (s *DNSServiceImpl) DeleteDNSRecord(userId int, domainName string, recordId int) (CreateDNSRecordResponse, error) {
+	path := fmt.Sprintf("/v1/user/%v/zone/%v/record/%v", userId, domainName, recordId)
+
+	req, err := s.client.newRequest("DELETE", path, nil)
 
 	var createDNSRecordResponse CreateDNSRecordResponse
 	_, err = s.client.do(req, &createDNSRecordResponse)
