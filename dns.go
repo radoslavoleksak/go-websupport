@@ -9,6 +9,7 @@ type DNSService interface {
 	GetDNSZoneDetail(userId int, domainName string) (DNSZone, error)
 	ListAllDNSRecords(userId int, domainName string) (ListAllDNSRecordsResponse, error)
 	GetDNSRecordDetail(userId int, domainName string, recordId int) (DNSRecord, error)
+	CreateDNSRecord(userId int, domainName string, dnsRecord *DNSRecord) (CreateDNSRecordResponse, error)
 }
 
 type DNSServiceImpl struct {
@@ -55,6 +56,16 @@ func (s *DNSServiceImpl) GetDNSRecordDetail(userId int, domainName string, recor
 	return dnsRecord, err
 }
 
+func (s *DNSServiceImpl) CreateDNSRecord(userId int, domainName string, dnsRecord *DNSRecord) (CreateDNSRecordResponse, error) {
+	path := fmt.Sprintf("/v1/user/%v/zone/%v/record", userId, domainName)
+
+	req, err := s.client.newRequest("POST", path, dnsRecord)
+
+	var createDNSRecordResponse CreateDNSRecordResponse
+	_, err = s.client.do(req, &createDNSRecordResponse)
+	return createDNSRecordResponse, err
+}
+
 type ListAllDNSZonesResponse struct {
 	Items		[]DNSZone	`json:"items"`
 }
@@ -79,4 +90,10 @@ type DNSRecord struct {
 	Weight   	int  		`json:"weight"`
 	Port   		int  		`json:"port"`
 	Zone		DNSZone		`json:"zone"`
+}
+
+type CreateDNSRecordResponse struct {
+	Status		string  				`json:"status"`
+	Item		DNSRecord				`json:"item"`
+	Errors		map[string]interface{}  `json:"errors"`
 }
